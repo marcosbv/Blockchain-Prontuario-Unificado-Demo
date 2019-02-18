@@ -1,0 +1,41 @@
+{
+    "transacoes": [
+        {
+            "$class": "prontuariounificado.AgendarConsulta",
+            "idConsulta": "string",
+            "dataConsulta": "2019-03-01T08:00:00.000Z",
+            "medicoAtendente": {
+              "$class": "prontuariounificado.Medico",
+              "crm": "234321",
+              "cpf": "09876543211",
+              "nome": "Dr. Marcos",
+              "endereco": {
+                "$class": "prontuariounificado.Endereco",
+                "logradouro": "Rua das Merces",
+                "numero": "224",
+                "cidade": "Sao Paulo",
+                "estado": "SP",
+                "cep": "18112-655"
+              }
+            },
+            "prontuarioPaciente": "resource:prontuariounificado.ProntuarioPaciente#33299448897",
+            "convenio" : {
+              "$class": "prontuariounificado.Convenio",
+              "registroAns": "134512",
+              "cnpj": "345.315.001/0001-01",
+              "nome": "NIMED",
+              "endereco": {
+                "$class": "prontuariounificado.Endereco",
+                "logradouro": "Avenida Paulista",
+                "numero": "3572",
+                "complemento": "7. Andar",
+                "cidade": "Sao Paulo",
+                "estado": "SP",
+                "cep": "18400-000"
+              }
+            },
+            "timestamp": "2019-02-17T14:35:30.559Z"
+          }
+    ]
+
+}

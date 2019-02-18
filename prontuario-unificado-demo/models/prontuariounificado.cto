@@ -1,0 +1,185 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Write your model definitions here
+ */
+
+/**
+* Modelagem para prontuario unificado de pacientes
+* Marcos Tadeu Brisola Vieira
+*/
+
+namespace prontuariounificado
+
+// parte 1: conceitos
+
+// Conceito de exame
+concept Exame {
+  o String nome
+  o String codigoAmb
+}
+
+// Conceito de um resultado de exame presente em um laudo
+concept ResultadoExame {
+  o Exame   exame
+  o String  resultadoExame 
+  o DateTime dataResultado
+  o Boolean resultadoNormal
+}
+
+// Conceito de uma cirurgia realizada
+concept Cirurgia {
+  o DateTime  dataCirurgia
+  o String    local
+  o Medico    medicoResponsavel
+}
+
+// Conceito de um questionario de perguntas feitas ao paciente
+concept Questionario {
+  o String     dataUltimaMenstruacao
+  o String     temDiabetes
+  o String[]   doencasCronicas
+  o Cirurgia[] cirurgiasRealizadas
+}
+
+concept Endereco {
+  o String     logradouro
+  o String     numero
+  o String     complemento optional
+  o String     cidade
+  o String     estado
+  o String     cep
+}
+
+// parte 2: atores
+
+// representacao de pessoa fisica
+abstract participant Pessoa identified by cpf {
+  o String cpf
+  o String nome
+  o Endereco endereco
+}
+
+// representacao de pessoa juridica
+abstract participant Empresa identified by cnpj {
+  o String cnpj
+  o String nome
+  o Endereco endereco
+}
+
+// representa um medico
+participant Medico extends Pessoa {
+  o String crm
+}
+
+// representa um paciente 
+participant Paciente extends Pessoa {
+
+}
+
+// representa um convenio
+participant Convenio extends Empresa {
+  o String registroAns
+}
+
+// representa um laboratorio que realiza procedimentos
+participant Laboratorio extends Empresa {
+  o String crmResponsavel
+}
+
+// representa o orgao regulador (ANS)
+participant AgenciaNacionalSaude extends Empresa {
+
+}
+
+// parte 3: assets
+
+// representa um agendamento com um medico 
+asset ConsultaMedica       identified by idConsultaMedica {
+  o String     idConsultaMedica
+  o DateTime   dataAgendamento
+  o Boolean    consultaRealizada
+  --> Medico   medicoAtendente
+  --> Convenio convenioPaciente
+}
+
+// representa uma solicitacao de exames
+asset GuiaSolicitacaoExame identified by idSolicitacao{
+  o String     idSolicitacao
+  o DateTime   dataSolicitacao
+  o Exame[]    examesSolicitados
+  --> Convenio convenioPaciente
+  o Boolean    autorizado
+}
+
+// representa o laudo dos exames solicitados a um ou mais laboratorios
+asset LaudoExames identified by idLaudo {
+  o String                 idLaudo
+  o DateTime               dataLaudo
+  --> GuiaSolicitacaoExame guiaSolicitacaoExame
+  --> Laboratorio          laboratorioExecutor
+  o ResultadoExame[]       resultadoExames
+  o String                 laudoOriginal
+}
+
+asset ProntuarioPaciente identified by idProntuario {
+  o String                     idProntuario
+  --> Paciente                 paciente
+  o Questionario               questionarioPaciente optional
+  --> ConsultaMedica[]         consultasMedicas
+  --> GuiaSolicitacaoExame[]   solicitacoesExame
+  --> LaudoExames[]            laudosEmitidos
+}
+
+// parte 4: transacoes
+transaction AgendarConsulta {
+  o String       idConsulta
+  o DateTime     dataConsulta
+  o Medico       medicoAtendente
+  o Convenio     convenio
+  --> ProntuarioPaciente   prontuarioPaciente
+}
+
+transaction SolicitarExames {
+  o Exame[]      listaExames
+  o Medico       medicoSolicitante
+  --> GuiaSolicitacaoExame  guiaSolicitacaoExames
+}
+
+transaction AssinarSolicitacao {
+  o DateTime                dataRealizacaoExame
+  o Convenio                convenioPaciente
+  o Laboratorio             laboratorioExecutante
+  --> GuiaSolicitacaoExame  guiaSolicitacaoExames
+}
+
+transaction AutorizarSolicitacao {
+  o Boolean                 autorizado
+  --> GuiaSolicitacaoExame  guiaSolicitacaoExame
+}
+
+transaction EmitirLaudo {
+  o DateTime               dataEmissaoLaudo
+  o Laboratorio            laboratorioExecutor
+  o GuiaSolicitacaoExame   guiaRelacionada
+  o ResultadoExame[]       resultadoExames
+  o String                 laudoOriginal
+  --> Paciente             pacienteLaudo
+}
+
+// para propositos de demonstracao
+transaction InicializacaoDemo {
+
+}
